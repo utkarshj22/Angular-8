@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <button
+        class="btn btn-primary"
+        (click)="onlyOdd = !onlyOdd">Only show odd numbers</button>
+      <br><br>
+      <ul class="list-group">
+        <li
+          class="list-group-item">
+        </li>
+      </ul>
+      <ng-template [ngIf]="onlyOdd">
+        <p>Only odd</p>
+      </ng-template>
+
+      <p appBasicHighlight>Style me with custom Directive! </p>
+<!--      <p appBetterHighlight [defaultColor]="'yellow'" [highlightedColor]="'red'">Style me with better custom Directive with renderer use! </p>-->
+<!--      //DirectiveName and Input alias is same-->
+<!--      <p [appBetterHighlight]="'yellow'" [highlightedColor]="'red'">Style me with better custom Directive with renderer use!</p>-->
+<!--      //can omit [] and'' for string property binding-->
+     <p [appBetterHighlight]="'yellow'" highlightedColor="red">Style me with better custom Directive with renderer use!</p>
+
+    </div>
+  </div>
+</div>
