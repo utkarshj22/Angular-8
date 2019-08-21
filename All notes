@@ -1,0 +1,296 @@
+View Encapsulation
+If the user defines a css in a component where other directives are included then because of angular the css will apply only to the component where it s defined and not in the component that are include.
+This is a angular property as if n a component we define p { color: blue;}, 
+Then according to browser all paragraoh in the page will have blue color but according to angular only p of the component where css is defned will be blue.
+
+So angular applies attributes to all elements(style encapsulation) in specific component.
+So if a page has 3 component all the elements of a particular component has particular attributes to all the elements, thus enforcing that the css of the component is applied 
+to that component only, thus doing style encapsulation
+
+Shadow DOM- Each component has a shadow DOM behind it to attach specific properties to each.
+But this technology s not supported by all browser.
+
+
+the encapsulation that is the unique id can be removed from the component by adding
+ encapsulation: ViewEncapsulation.None
+ in the @Component decorator 
+ by appling this to the component that component CSS is global now so that component css is applied to all the components containing that element in the page.
+ 
+ encapsulation: ViewEncapsulation.Native
+ It uses shadow DOM technology so it will give the default result of Angular but only in browser that supports Shadow DOM
+ 
+ 
+	encapsulation: ViewEncapsulation.Emulated 
+	This is the default setting and dont need to explicitly adding
+	
+	
+	Local Reference
+	
+	This can be placed on any HTML element not necessary input
+	This is used to remove 2 way binding when it is not needed
+	the reference holds the reference to the element so it will have all its property 
+	#refrence name is the way the reference is given.
+	And this reference can be used everywhere in your template but only inside HTMML and not is .ts
+	So with the html we can pass this template as a paramter to a function thus passing  to ts
+	 
+	 @ViewChild
+	 To access the reference in ts file without passing from HTML
+	 @ViewChild('name') name : ElementRef
+	 'name' - means it is passed as a string
+	 ElementRef - The view Child returns an object that is an element reference
+	 
+	 now to get the value - this.name.nativeElement.value
+	 
+	 But with this we should not change the value of the ref can be done bythis.name.nativeElement.value = 'Something'
+	 But it is strongly recommended not to access DOM elements like this
+	 
+	 ng-content:
+	 if we want to show some data that is inside a directive file 
+	 But that directive is included in another controller html
+	 then to display the data in another directive we need to add this directive <ng-content></ng-content> at the place where we want the data to 
+	 be added so it acts like a hook
+	 This can be used in code where we are creating widgets that can be used multiple places and the data is coming from a different source
+	 as property binding can not be used for complex things
+	 
+	  hooks:
+	  Though direct using the method will work but it is good practice to implement the hooks that we are using.
+	  
+	  The only hook that needs an argument is
+	  ngOnChanges(changes: SimpleChnages)
+	  
+	  constructor, ngOnInit, ngOnChange, ngDoCheck, ngAfterContentInit, ngAfterContentChecked, ngAfterViewInit, ngAfterViewChecked, ngOnDestroy
+	  
+	  AfterViewInit - gives access to your template elements , you can access or change but not before that as it is not available before that
+	  
+	  @ContentChild:
+	  When a reference is placed at the parent where the ng-conetent is placed for child than to access the reference at the child 
+	  @ViewChild wont work as it is not part of view but it is part of conetent so
+	  and it can be accesed only afetr ngAfterContentInit
+	  
+	  
+	  Custom event dont propogate up so you cannot listen an event emitted in child to its grand parent.
+	  Only parent where the selector is used can listen to the emitted event.
+$event refers to the data that we pass with the event
+
+
+
+
+ Structural directive
+ 
+ will use * in starting to specify structural directive
+ like- *ngFor = "let abc of xyz"
+ *ngIf = "variableName"
+ 
+ But 2 structural directives cannot be used in the same HTML tag.. Only 1 can be used at a time
+ 
+ 
+ Attribute Directive
+ Ex- ngClass , ngStyle
+ 
+ [ngClass] = "{cssName : some condition}"
+ []- indicates we are binding some property on ngClass its not syntax
+ 
+ [ngStyle]= "{backgroundColor: red}"
+ 
+ Directive:
+
+Can be used by importing Directive from Angular core
+and specified by a decorator
+@Directive({})- and it needs an object.
+Now the selector is absolutely needed and this should be unique.
+Use camel case
+@Directive({
+selector : 'appBbbCcc'
+})
+This is selector by element
+to add atttribute
+selector : '[appBbbCcc]'
+
+Now to make any changes to the element on which we are adding this attribute we need to get access to the element that can be done by constructor
+We define what we need in constr' and the angular fetches and give it to us when the page is loaded
+
+constructor(private elementRef: ElementRef){
+}
+This will give access to the element ref and since we have given private or an access modifier so by typescript it will automatically get assigned to elementRef
+and will be available as a property.
+We do not need to explicitly write.(this.elementRef = ElementRef)
+
+But any custom directive created needs to be informed to the angular that we have one as it will not scan the files for you.
+So in app.module.ts add it is declaration , add the class name of the directive here.
+
+Shortcut to create directive: ng g d nameofDirective
+ 
+ You should not though access the elements directly in angular like ElementRef.nativeElement.style
+ So instead of this use Renderer object from Renderer2
+ 
+ so,
+ constructor(private elref:ElementRef, private renderer:Renderer2){
+ }
+ ngOnInint(){
+   this.rendere(elref.nativeElement,'background-color','blue');
+ }
+ 
+1) Have to pass the element on which we want to change -> but its native element 
+ 2) Which property we want to set
+ 3) value to assign for this property
+ 4) flag- it is optional it is used to give !important or to override other style
+ 
+ So renderer is a better approach to access DOM as the angular is not limited to run on browser it can run on server also
+ 
+ 
+ Add @HostListner decorator to listen to events-like mouseOver
+ 
+ @HostListner('mouseenter') functioname(eventData: Event){
+	this.renderer.setStyle();
+ }
+ 
+ If you only want to set Style then we can simplpy do it without using renderer
+ 
+ @HostBinding('style.backgroundColor') bgColor:string = 'transparent';
+ 
+ 'transparent' : initial / default so it does not throw error as we have given only on mouseenter and mouseleave
+ 
+ style.backgroundColor - the property of the element that we need to use.( lIke in normal we used this.elementRef.native."style.backgroundColor" = "blue");
+ CamelCase as accessing DOM which do not understand -.
+ 
+ Using HostBinding we can bind to any property we are sitting on but that element should have that property like input has specific property
+ 
+ 
+ To use customer to change
+ use @Input() defaultColor : string;
+ and in HTML in that <p directiveName [defaultColor]="'yellow'";
+ ''-> as we have deg=fined defaultColor as string in ts file so need to pass as string from HTML.
+ 
+ @Input can have alias and if the alias is same as directive name then it can be directly passed.
+ @Input('directiveName') defaultColor:string;
+ <p [directiveName]="'yellow'">
+ 
+ It will automatically see it as a directive and property binding also
+ 
+ If propertyBinfding is on string then can omit '' and []
+ <p directiveName defaultColor="yellow";
+ will work fine
+ 
+ 
+ Structural Directive
+ *ngIf()
+ changes to 
+ 
+ <ng-template [ngIf]="condition">
+ 
+ So to create your own custom structural directive create a directive and in it add
+ @Input set unless(condition: boolean){
+ }
+ 
+ set - it is a setter method that is called whenever the property unless changes that is binded to the Input
+ 
+ Like ElementRef gives reference to element TemplateRef(what to refrence) gives reference to template similary ViewContainerRef (where to refrence)
+  Name of the function and directive should be same as structural directive in the end is propertyBinding
+  
+  
+  ngSwitch
+  
+   <div [ngSwitch]="value">
+        <p *ngSwitchCase="5"> Value is 5</p>
+        <p *ngSwitchCase="10"> Value is 10</p>
+        <p *ngSwitchCase="100"> Value is 100</p>
+        <p *ngSwitchDefault> Value is default</p>
+      </div>
+	  
+	  
+	  
+	  
+	  Services and Dependency injection
+	  
+	  A service is a normal type script class so no decorator is needed
+	  
+	  export class ClassName{}
+	  This is a service
+	  
+	  Hoow to use service
+	  
+	  We can import the service then create an instance of the service and pass the argument by calling function through the created instance.
+	  
+	  Ex:
+	  import {ClassName} from ../class.name
+	  
+	  const abb = new ClassName();
+	  abb.functioname();
+	  
+	  So should do it by using constructor
+	  
+	  constructor(private name : ServiceName){}
+	  And
+	  in @Component(){
+		providers: [ServiceName]
+	  }
+	  
+	  this.name.functioname();
+	  
+	  Initialization of members should not be done in constr
+	  
+	  It shoulkd be done in ngOnInit()
+	  
+	  But this creates a instance of service for this and all child component
+	  
+	  1) so can provide in app module so will be used in whole application ( all comp and services)
+	  2) can be in app component so in all components except services
+	3) in seprate component so only that comp and its child
+	4) or in parent and also in child so now child will have a seprate instance , it overrides the parent service
+	
+	
+	So if you want to use parent leave import and in constructor just remove from the provider to not create a separate instance
+	
+	if you attach a serviec to anything than that anything should have metadata
+	A component or a directive has metadata usinh @Component and @Directive
+	So to service add @Injectable()
+	
+	So add @Injectable() before the className of the service where we want other service to be injected.(Receiving service)
+	
+	What we can do is a event can be emitted from the child component class when its created in a service.
+	
+	And to access to the emitted event in another component just subscribe an emit is just like observable.
+	
+	this.serviceName.emittedObjectName.subscribe(
+	  (status:string) => alert('New status: '+ status)
+	);
+	So this is cross component communication using service through event emitter without property or event binding.
+	
+	In Angular 6+
+	Instead of adding a service class to the providers[]  array in AppModule , you can set the following config in @Injectable() :
+@Injectable({providedIn: 'root'})export class MyService { ... }
+This provides lazyloading to service this improving performance
+
+In a service if an array is created. and in getArray method we return
+
+getArray(){
+	return this.arrayName;
+}
+Then by doing so we are returning direct refrence to the array and since array are also object refrence so anyone that gets this array can change the array connect.
+So to prevent it we can do is slice the array while returning. By this a copy of the array is returned and  not the exact array.
+
+getArray(){
+	return this.arrayName.slice();
+}
+
+
+
+
+Routing
+
+To pass query parameter in url
+Ex: abc\ass?edit=5
+
+In HTML:
+[queryParams] = ""
+
+queryParams is not directive it is just property of router
+so since property binding so accept jsobject of Key value pair
+
+[queryParams] = "{allowEdit: '1'}"
+If more & sign between them
+
+To add fragment Ex: #loading
+
+fragment = "loading"
+	  
